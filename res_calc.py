@@ -59,8 +59,6 @@ class Scr(Screen):
                 более удобный и понятный вид.
             is_int(self, value):
                 Проверка того, является ли переменная(value) целочисленной или нет
-            changer(self, instance):
-                Смена различных окон приложения
     '''
 
     def __init__(self, **kwargs):
@@ -87,15 +85,6 @@ class Scr(Screen):
         '''Проверка того, является ли переменная целочисленной или нет'''
         return not (n % 1)
 
-    def changer(self, instance):
-        '''Смена различных видов окон приложения'''
-        if instance.id == "4":
-            self.manager.current = '4rings'
-        if instance.id == "5":
-            self.manager.current = '5rings'
-        elif instance.id == "smd":
-            self.manager.current = 'smd'
-
 
 class FourRingsScreen(Scr):
     ''' Класс, предназначенный для вычисления сопротивлений
@@ -115,9 +104,6 @@ class FourRingsScreen(Scr):
 
         parent = BoxLayout(orientation="vertical")
         params_table = BoxLayout()  # таблица с параметрами резистора
-        action_bar = ActionBar()
-        action_view = ActionView()
-        action_group1 = ActionGroup(text="Normal")
         self.result = Label(text="1 Ом ± 1%", font_size='25sp', size_hint_y=None)  # результат вычислений сопротивления
 
         # СОЗДАЕМ ТАБЛИЦУ С ПАРАМЕТРАМИ РЕЗИСТОРА
@@ -187,13 +173,6 @@ class FourRingsScreen(Scr):
                         button += 1  # увеличиваем текущую позицию кнопки в столбце
             params_table.add_widget(col)  # добавляем текущий столбец в таблицу
 
-        action_view.add_widget(ActionPrevious(with_previous=False, app_icon="icon.png"))
-        action_group1.add_widget(ActionButton(id="4", text="4 rings"))
-        action_group1.add_widget(ActionButton(id="5", text="5 rings", on_press=self.changer))
-        action_view.add_widget(action_group1)
-        action_view.add_widget(ActionButton(id="smd", text="SMD", on_press=self.changer))
-        action_bar.add_widget(action_view)
-        parent.add_widget(action_bar)
         parent.add_widget(self.result)
         parent.add_widget(params_table)
         self.add_widget(parent)
@@ -223,9 +202,6 @@ class FiveRingsScreen(Scr):
         self.cols_heads = ["1st ring", "2nd ring", "3rd ring", "Multiplier", "Tolerance"]
         parent = BoxLayout(orientation="vertical")
         params_table = BoxLayout()
-        action_bar = ActionBar()
-        action_view = ActionView()
-        action_group1 = ActionGroup(text="Normal")
         self.result = Label(text="1 Ом ± 1%", font_size='25sp', size_hint_y=None)
 
         column = 0
@@ -294,13 +270,6 @@ class FiveRingsScreen(Scr):
                         button += 1
             params_table.add_widget(col)
 
-        action_view.add_widget(ActionPrevious(with_previous=False, app_icon="icon.png"))
-        action_group1.add_widget(ActionButton(id="4", text="4 rings", on_press=self.changer))
-        action_group1.add_widget(ActionButton(id="5", text="5 rings"))
-        action_view.add_widget(action_group1)
-        action_view.add_widget(ActionButton(id="smd", text="SMD", on_press=self.changer))
-        action_bar.add_widget(action_view)
-        parent.add_widget(action_bar)
         parent.add_widget(self.result)
         parent.add_widget(params_table)
         self.add_widget(parent)
@@ -330,9 +299,6 @@ class SMDScreen(Scr):
     def __init__(self, **kwargs):
         super(SMDScreen, self).__init__(**kwargs)
         parent = BoxLayout(orientation="vertical")
-        action_bar = ActionBar()
-        action_view = ActionView()
-        action_group1 = ActionGroup(text="Normal")
         self.result = Label(text="100 Ом ± 5%", font_size='25sp', size_hint_y=None)
         box = FloatLayout()
         value_textbox = TextInput(
@@ -340,21 +306,14 @@ class SMDScreen(Scr):
             text="101",
             size_hint=(None, None),
             size=(150, 80),
-            padding=[20, 10, 10, 20],
+            padding=[15, 10, 10, 15],
             background_color=(0, 0, 0, 1),
             cursor_color=(1, 1, 1, 1),
             foreground_color=(1, 1, 1, 1),
             pos_hint={'center_x': .5, 'y': .5},
             font_size=50,
             on_text_validate=self.calculation)
-        action_view.add_widget(ActionPrevious(with_previous=False, app_icon="icon.png"))
-        action_group1.add_widget(ActionButton(id="4", text="4 rings", on_press=self.changer))
-        action_group1.add_widget(ActionButton(id="5", text="5 rings", on_press=self.changer))
-        action_view.add_widget(action_group1)
-        action_view.add_widget(ActionButton(id="smd", text="SMD"))
-        action_bar.add_widget(action_view)
         box.add_widget(value_textbox)
-        parent.add_widget(action_bar)
         parent.add_widget(self.result)
         parent.add_widget(box)
         self.add_widget(parent)
@@ -441,18 +400,38 @@ class SMDScreen(Scr):
 
 class RescalcApp(App):
     ''' Основной класс приложения'''
-
     def build(self):
         self.icon = "icon.png"  # иконка проложения
         Window.clearcolor = (.19, .19, .19, 1)  # фоновой цвет приложения
-        screen_manager = ScreenManager(transition=NoTransition())  # виджет управления окнами
+        parent = BoxLayout(orientation="vertical")
+        action_bar = ActionBar()
+        action_view = ActionView()
+        action_group = ActionGroup(text="Normal")
+        self.screen_manager = ScreenManager(transition=NoTransition())  # виджет управления окнами
         four_rings_screen = FourRingsScreen(name='4rings')  # окно для расчета сопротивления резистора с 4 кольцами
         five_rings_screen = FiveRingsScreen(name='5rings')  # окно для расчета сопротивления резистора с 5 кольцами
         smd_screen = SMDScreen(name="smd")  # окно для расчета сопротивления smd резистора
-        screen_manager.add_widget(four_rings_screen)
-        screen_manager.add_widget(five_rings_screen)
-        screen_manager.add_widget(smd_screen)
-        return screen_manager
+        self.screen_manager.add_widget(four_rings_screen)
+        self.screen_manager.add_widget(five_rings_screen)
+        self.screen_manager.add_widget(smd_screen)
+        action_view.add_widget(ActionPrevious(with_previous=False, app_icon="icon.png"))
+        action_group.add_widget(ActionButton(id="4", text="4 rings", on_press=self.changer))
+        action_group.add_widget(ActionButton(id="5", text="5 rings", on_press=self.changer))
+        action_view.add_widget(action_group)
+        action_view.add_widget(ActionButton(id="smd", text="SMD", on_press=self.changer))
+        action_bar.add_widget(action_view)
+        parent.add_widget(action_bar)
+        parent.add_widget(self.screen_manager)
+        return parent
+
+    def changer(self, instance):
+        '''Смена различных видов окон приложения'''
+        if instance.id == "4":
+            self.screen_manager.current = '4rings'
+        if instance.id == "5":
+            self.screen_manager.current = '5rings'
+        elif instance.id == "smd":
+            self.screen_manager.current = 'smd'
 
 
 if __name__ == '__main__':  # если программа была запущена , а не импортирована, то
