@@ -1,16 +1,24 @@
 # -*- coding: utf-8 -*-
-
-# ------------------------ Библиотеки ------------------------
+import os
+import sys
 from kivy.app import App
+from kivy.lang import Builder
+from kivy.properties import ObjectProperty, StringProperty
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.floatlayout import FloatLayout
-from kivy.core.window import Window
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
-from kivy.uix.actionbar import ActionBar, ActionButton, ActionView, ActionPrevious, ActionGroup
-from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+
+from libs.navigationdrawer import NavigationDrawer
+from kivymd.theming import ThemeManager
+
+ROOT_DIR = os.path.dirname(__file__)
+KV_DIR = os.path.join(ROOT_DIR, "kv")
+
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 
 # ------------------------ Константы и переменные ------------------------
 BUTTON_COLORS = (  # все возможные цвета для колец резистора
@@ -95,7 +103,6 @@ class FourRingsScreen(Scr):
                 Метод, производящий вычисление сопротивления,
                 по заданным параметрам резистора
     '''
-
     def __init__(self, **kwargs):
         super(FourRingsScreen, self).__init__(**kwargs)
         NUM_COLS = 4  # количество столбцов
@@ -193,7 +200,6 @@ class FiveRingsScreen(Scr):
                 Метод, производящий вычисление сопротивления,
                 по заданным параметрам резистора
     '''
-
     def __init__(self, **kwargs):
         super(FiveRingsScreen, self).__init__(**kwargs)
         NUM_COLS = 5
@@ -295,28 +301,11 @@ class SMDScreen(Scr):
                 значения, совпадающие с кодом digits, и множитель.
                 Возвращаем произведение значения и множителя
     '''
+    result = StringProperty()
 
     def __init__(self, **kwargs):
         super(SMDScreen, self).__init__(**kwargs)
-        parent = BoxLayout(orientation="vertical")
-        self.result = Label(text="100 Ом ± 5%", font_size='25sp', size_hint_y=None)
-        box = FloatLayout()
-        value_textbox = TextInput(
-            multiline=False,
-            text="101",
-            size_hint=(None, None),
-            size=(150, 80),
-            padding=[15, 10, 10, 15],
-            background_color=(0, 0, 0, 1),
-            cursor_color=(1, 1, 1, 1),
-            foreground_color=(1, 1, 1, 1),
-            pos_hint={'center_x': .5, 'y': .5},
-            font_size=50,
-            on_text_validate=self.calculation)
-        box.add_widget(value_textbox)
-        parent.add_widget(self.result)
-        parent.add_widget(box)
-        self.add_widget(parent)
+        self.result = "100 Ом ± 5%"
 
     def calculation(self, instance):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
@@ -330,7 +319,7 @@ class SMDScreen(Scr):
             elif len(user_input) == 4:  # если длина user_input - 4 , то
                 resistance = int(user_input[0] + user_input[1] + user_input[2]) * pow(10, int(user_input[3]))   # первые три числа из полученного значения умножаем на 10 в степени 4 числа
                 tolerance = TOLERANCES[2]
-            self.result.text = self.format_result(resistance) + tolerance  # изменяем значение Label
+            self.result = self.format_result(resistance) + tolerance  # изменяем значение Label
         else:  # если полученное значение не полностью число , то
             try:
                 if (user_input.index("R") >= 0) and not(user_input.index("R") == len(user_input) - 1):  # если в полученном значении если Буква R и она находится не на последнем месте, то
@@ -338,7 +327,7 @@ class SMDScreen(Scr):
                         resistance = float(user_input.replace("R", "0."))  # заменяем букву R в строке на 0.
                     else:
                         resistance = float(user_input.replace("R", "."))  # иначе заменяем букву R в строке на .
-                    self.result.text = self.format_result(resistance) + tolerance  # изменяем значение Label
+                    self.result = self.format_result(resistance) + tolerance  # изменяем значение Label
             except ValueError:  # если буквы R в строке нет, то
                 if len(user_input) == 3:  # если длина строки - 3
                     tolerance = TOLERANCES[2]
@@ -346,7 +335,7 @@ class SMDScreen(Scr):
                     letter_code = user_input[2]  # последний символ в строке
                     if digits_code.isdigit():  # если первые два символа в строке - число
                         resistance = self.get_code_value(digits_code, letter_code)  # находим в таблице значения и получаем результат
-                    self.result.text = self.format_result(resistance) + tolerance  # изменяем значение Label
+                    self.result = self.format_result(resistance) + tolerance  # изменяем значение Label
 
     def get_code_value(self, digits, letter):
         ''' Получение значения сопротивления резистора
@@ -398,41 +387,48 @@ class SMDScreen(Scr):
         return value * multiplier
 
 
-class RescalcApp(App):
-    ''' Основной класс приложения'''
-    def build(self):
-        self.icon = "icon.png"  # иконка проложения
-        Window.clearcolor = (.19, .19, .19, 1)  # фоновой цвет приложения
-        parent = BoxLayout(orientation="vertical")
-        action_bar = ActionBar()
-        action_view = ActionView()
-        action_group = ActionGroup(text="Normal")
-        self.screen_manager = ScreenManager(transition=NoTransition())  # виджет управления окнами
-        four_rings_screen = FourRingsScreen(name='4rings')  # окно для расчета сопротивления резистора с 4 кольцами
-        five_rings_screen = FiveRingsScreen(name='5rings')  # окно для расчета сопротивления резистора с 5 кольцами
-        smd_screen = SMDScreen(name="smd")  # окно для расчета сопротивления smd резистора
-        self.screen_manager.add_widget(four_rings_screen)
-        self.screen_manager.add_widget(five_rings_screen)
-        self.screen_manager.add_widget(smd_screen)
-        action_view.add_widget(ActionPrevious(with_previous=False, app_icon="icon.png"))
-        action_group.add_widget(ActionButton(id="4", text="4 rings", on_press=self.changer))
-        action_group.add_widget(ActionButton(id="5", text="5 rings", on_press=self.changer))
-        action_view.add_widget(action_group)
-        action_view.add_widget(ActionButton(id="smd", text="SMD", on_press=self.changer))
-        action_bar.add_widget(action_view)
-        parent.add_widget(action_bar)
-        parent.add_widget(self.screen_manager)
-        return parent
+class ScreenManagement(ScreenManager):
+    def __init__(self, **kwargs):
+        super(ScreenManagement, self).__init__(**kwargs)
+        self.add_widget(FourRingsScreen(name="4rings"))
+        self.add_widget(FiveRingsScreen(name="5rings"))
+        self.add_widget(SMDScreen(name="smd"))
 
-    def changer(self, instance):
-        '''Смена различных видов окон приложения'''
-        if instance.id == "4":
-            self.screen_manager.current = '4rings'
-        if instance.id == "5":
-            self.screen_manager.current = '5rings'
-        elif instance.id == "smd":
-            self.screen_manager.current = 'smd'
+
+class Navigator(NavigationDrawer):
+    title = StringProperty('Navigation')
+
+
+class ResCalcApp(App):
+    theme_cls = ThemeManager()
+    nav_drawer = ObjectProperty()
+
+    def build(self):
+        self.theme_cls.theme_style = 'Dark'
+        self.icon = "data/icon.png"
+        self.load_kv_files(KV_DIR)
+        main_widget = Builder.load_file(os.path.join(KV_DIR, "startscreen.kv"))
+        self.nav_drawer = Navigator()
+        return main_widget
+
+    def load_kv_files(self, directory_kv_files):
+        Builder.load_file(os.path.join(directory_kv_files, "startscreen.kv"))
+        Builder.load_file(os.path.join(directory_kv_files, "navigationdrawer.kv"))
+        Builder.load_file(os.path.join(directory_kv_files, "smd.kv"))
+        Builder.load_file(os.path.join(directory_kv_files, "navigator_menu.kv"))
+
+    def smd(self):
+        self.root.ids.manager.current = 'smd'
+        return True
+
+    def four_rings(self):
+        self.root.ids.manager.current = '4rings'
+        return True
+
+    def five_rings(self):
+        self.root.ids.manager.current = '5rings'
+        return True
 
 
 if __name__ == '__main__':  # если программа была запущена , а не импортирована, то
-    RescalcApp().run()  # запускаем kivy приложение
+    ResCalcApp().run()  # запускаем kivy приложение

@@ -1,0 +1,27 @@
+<NavDrawerToolbar@Label>
+    canvas:
+        Color:
+            rgba: root.parent.parent.theme_cls.divider_color
+        Line:
+            points: self.x, self.y, self.x+self.width,self.y
+
+<NavigationDrawer>
+    widget_list: widget_list
+    elevation: 0
+    canvas:
+        Color:
+            rgba: root.theme_cls.bg_light
+        Rectangle:
+            size: root.size
+            pos: root.pos
+    ScrollView:
+        do_scroll_x: False
+        MDList:
+            id: ml
+            id: widget_list
+
+<NavigationDrawerIconButton>
+    NDIconLabel:
+        id: _icon
+        font_style: 'Icon'
+        theme_text_color: 'Secondary'

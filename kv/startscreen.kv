@@ -1,0 +1,18 @@
+#:import Toolbar kivymd.toolbar.Toolbar
+
+BoxLayout:
+    orientation: 'vertical'
+    Toolbar:
+        id: toolbar
+        title: 'Resistor calculator'
+        background_color: app.theme_cls.primary_dark
+        left_action_items: [['menu', lambda x: app.nav_drawer.toggle()]]
+    ScreenManagement:
+        id: manager
+        size_hint: 1, 0.5
+        FourRingsScreen:
+            id: 4rings
+        FiveRingsScreen:
+            id: 5rings
+        SMDScreen:
+            id: smd

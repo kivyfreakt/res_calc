@@ -6,8 +6,8 @@
 
 <a id = "#chapter-0"></a>
 ## Скриншоты
-![Скриншот](https://github.com/musicfreakt/res_calc/blob/master/screenshots/screen1.png)
-![Скриншот](https://github.com/musicfreakt/res_calc/blob/master/screenshots/screen2.png)
+![Скриншот](https://github.com/musicfreakt/res_calc/blob/master/data/screenshots/screen1.png)
+![Скриншот](https://github.com/musicfreakt/res_calc/blob/master/data/screenshots/screen2.png)
 
 <a id = "#chapter-1"></a>
 ## Описание
