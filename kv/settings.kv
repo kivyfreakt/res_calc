@@ -1,0 +1,10 @@
+#:import MDThemePicker kivymd.theme_picker.MDThemePicker
+<SettingsScreen>:
+    ScrollView:
+        do_scroll_x: False
+        MDList:
+            id: ml
+            TwoLineIconListItem:
+                text: 'Change theme'
+                secondary_text: "Current: " + app.theme_cls.theme_style + ", " + app.theme_cls.primary_palette
+                on_release: app.theme_cls.theme_style = 'Dark' if app.theme_cls.theme_style == 'Light' else 'Light'

@@ -1,11 +1,13 @@
 <SMDScreen>:
     BoxLayout:
         orientation:"vertical"
-        Label:
+        MDLabel:
             id:result
             text: root.result
-            font_size:'25sp'
-            size_hint_y:None
+            font_style: 'Display1'
+            theme_text_color: 'Primary'
+            halign: 'center'
+            size_hint_y: None
         FloatLayout:
             TextInput:
                 multiline:False

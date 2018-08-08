@@ -10,6 +10,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivymd.theming import ThemeManager
+from kivymd.label import MDLabel
 
 ROOT_DIR = os.path.dirname(__file__)
 KV_DIR = os.path.join(ROOT_DIR, "kv")
@@ -74,16 +75,16 @@ class Scr(Screen):
 
     def format_result(self, value):
         '''Изменение значений сопротивлений в более удобный вид'''
-        s = " Oм ± "
+        s = " Om ± "
         if value >= MULTIPLIERS[11]:  # если сопротивление больше 10^8 , то
             value /= MULTIPLIERS[11]  # делим сопротивление на 10^8 и
-            s = " ГOм ± "             # добавляем десятичную приставку
+            s = " GOm ± "             # добавляем десятичную приставку
         elif value >= MULTIPLIERS[8]:
             value /= MULTIPLIERS[8]
-            s = " МOм ± "
+            s = " MOm ± "
         elif value >= MULTIPLIERS[5]:
             value /= MULTIPLIERS[5]
-            s = " кOм ± "
+            s = " kOm ± "
         if self.is_int(value):  # если значение целое число, то
             value = int(value)  # округляем float до int
         return (str(value) + s)
@@ -110,18 +111,18 @@ class FourRingsScreen(Scr):
 
         parent = BoxLayout(orientation="vertical")
         params_table = BoxLayout()  # таблица с параметрами резистора
-        self.result = Label(text="1 Ом ± 1%", font_size='25sp', size_hint_y=None)  # результат вычислений сопротивления
+        self.result = MDLabel(text='1 Om ± 1%', font_style='Display1', theme_text_color='Primary', halign='center', size_hint_y=None)  # результат вычислений сопротивления
 
         # СОЗДАЕМ ТАБЛИЦУ С ПАРАМЕТРАМИ РЕЗИСТОРА
         column = 0  # текущий столбец
         for column in range(NUM_COLS):  # пока текущий столбец меньше или равен общему количеству столбцов, то
             col = GridLayout(id=str(column), cols=1, spacing=5, padding=[5, 5, 5, 5])
-            col.add_widget(Label(text=self.cols_heads[column]))  # Создаем Label с названием текущего столбца
+            col.add_widget(MDLabel(font_style='Body1', theme_text_color='Primary', text=self.cols_heads[column], halign='center'))  # Создаем Label с названием текущего столбца
             if column < 2:  # если текущий столбец меньше 3 , то
                 row = 2  # текущий ряд столбца
                 button = 0  # текущая позиция кнопки в столбце
-                col.add_widget(Label(text="-"))  # выводим 2 Label с -, т.к
-                col.add_widget(Label(text="-"))  # первых двух кнопок нет
+                col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))  # выводим 2 Label с -, т.к
+                col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))  # первых двух кнопок нет
                 while row < NUM_ROWS:  # пока текущий ряд меньше 12, то
                     if row == 6 or row == 11:  # если ряд 6 или 11, то
                         col.add_widget(  # создаем кнопку с черным текстом(чтоб белый текст не сливался с желтым и белым цветом кнопки)
@@ -167,7 +168,7 @@ class FourRingsScreen(Scr):
                 button = 0  # текущая позиция кнопки в столбце
                 for row in range(NUM_ROWS):  # пока текущий ряд меньше 12, то
                     if (row == 2 or row == 5 or row == 6 or row == 11):   # если номер ряда 2, 5, 6 или 11, то
-                        col.add_widget(Label(text="-"))  # отображаем заглушку вместо кнопки
+                        col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))  # отображаем заглушку вместо кнопки
                     else:
                         col.add_widget(  # иначе отображаем кнопку
                             Button(
@@ -207,17 +208,17 @@ class FiveRingsScreen(Scr):
         self.cols_heads = ["1st ring", "2nd ring", "3rd ring", "Multiplier", "Tolerance"]
         parent = BoxLayout(orientation="vertical")
         params_table = BoxLayout()
-        self.result = Label(text="1 Ом ± 1%", font_size='25sp', size_hint_y=None)
+        self.result = MDLabel(text='1 Om ± 1%', font_style='Display1', theme_text_color='Primary', halign='center', size_hint_y=None)
 
         column = 0
         for column in range(NUM_COLS):
             col = GridLayout(id=str(column), cols=1, spacing=5, padding=[5, 5, 5, 5])
-            col.add_widget(Label(text=self.cols_heads[column]))
+            col.add_widget(MDLabel(font_style='Body1', theme_text_color='Primary', text=self.cols_heads[column], halign='center'))
             if column < 3:
                 row = 2
                 button = 0
-                col.add_widget(Label(text="-"))
-                col.add_widget(Label(text="-"))
+                col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))
+                col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))
                 while row < NUM_ROWS:
                     if row == 6 or row == 11:
                         col.add_widget(
@@ -263,7 +264,7 @@ class FiveRingsScreen(Scr):
                 button = 0
                 for row in range(NUM_ROWS):
                     if (row == 2 or row == 5 or row == 6 or row == 11):
-                        col.add_widget(Label(text="-"))
+                        col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))
                     else:
                         col.add_widget(
                             Button(
@@ -421,6 +422,7 @@ class ResCalcApp(App):
     def load_kv_files(self, directory_kv_files):
         Builder.load_file(os.path.join(directory_kv_files, "startscreen.kv"))
         Builder.load_file(os.path.join(directory_kv_files, "smd.kv"))
+        Builder.load_file(os.path.join(directory_kv_files, "settings.kv"))
 
     def settings(self):
         self.root.ids.manager.current = 'settings'
