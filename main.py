@@ -9,8 +9,6 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-
-from libs.navigationdrawer import NavigationDrawer
 from kivymd.theming import ThemeManager
 
 ROOT_DIR = os.path.dirname(__file__)
@@ -21,6 +19,97 @@ sys.setdefaultencoding('utf8')
 
 
 # ------------------------ Константы и переменные ------------------------
+
+main_widget_kv = '''
+#:import Toolbar kivymd.toolbar.Toolbar
+#:import ThemeManager kivymd.theming.ThemeManager
+#:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
+#:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
+#:import NavigationDrawerDivider kivymd.navigationdrawer.NavigationDrawerDivider
+#:import NavigationDrawerToolbar kivymd.navigationdrawer.NavigationDrawerToolbar
+#:import NavigationDrawerSubheader kivymd.navigationdrawer.NavigationDrawerSubheader
+#:import MDCheckbox kivymd.selectioncontrols.MDCheckbox
+#:import MDSwitch kivymd.selectioncontrols.MDSwitch
+#:import MDList kivymd.list.MDList
+#:import OneLineListItem kivymd.list.OneLineListItem
+#:import TwoLineListItem kivymd.list.TwoLineListItem
+#:import ThreeLineListItem kivymd.list.ThreeLineListItem
+#:import OneLineAvatarListItem kivymd.list.OneLineAvatarListItem
+#:import OneLineIconListItem kivymd.list.OneLineIconListItem
+#:import OneLineAvatarIconListItem kivymd.list.OneLineAvatarIconListItem
+#:import MDTextField kivymd.textfields.MDTextField
+#:import MDSpinner kivymd.spinner.MDSpinner
+#:import MDCard kivymd.card.MDCard
+#:import MDSeparator kivymd.card.MDSeparator
+#:import MDDropdownMenu kivymd.menu.MDDropdownMenu
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import colors kivymd.color_definitions.colors
+#:import SmartTile kivymd.grid.SmartTile
+#:import MDSlider kivymd.slider.MDSlider
+#:import MDTabbedPanel kivymd.tabs.MDTabbedPanel
+#:import MDTab kivymd.tabs.MDTab
+#:import MDProgressBar kivymd.progressbar.MDProgressBar
+#:import MDAccordion kivymd.accordion.MDAccordion
+#:import MDAccordionItem kivymd.accordion.MDAccordionItem
+#:import MDAccordionSubItem kivymd.accordion.MDAccordionSubItem
+#:import MDThemePicker kivymd.theme_picker.MDThemePicker
+#:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
+#:import MDBottomNavigationItem kivymd.tabs.MDBottomNavigationItem
+
+NavigationLayout:
+    id: nav_layout
+    MDNavigationDrawer:
+        id: nav_drawer
+        NavigationDrawerToolbar:
+            title: "Navigation"
+        NavigationDrawerIconButton:
+            icon: 'checkbox-blank-circle'
+            text: "4 rings"
+            on_release: app.four_rings()
+        NavigationDrawerIconButton:
+            icon: 'checkbox-blank-circle'
+            text: "5 rings"
+            on_release: app.five_rings()
+        NavigationDrawerIconButton:
+            icon: 'checkbox-blank-circle'
+            text: "smd"
+            on_release: app.smd()
+        NavigationDrawerIconButton:
+            icon: 'checkbox-blank-circle'
+            text: "about"
+            on_release: app.about()
+        NavigationDrawerIconButton:
+            icon: 'checkbox-blank-circle'
+            text: "settings"
+            on_release: app.settings()
+        NavigationDrawerIconButton:
+            icon: 'checkbox-blank-circle'
+            text: "exit"
+            on_release: app.stop()
+
+    BoxLayout:
+        orientation: 'vertical'
+        Toolbar:
+            id: toolbar
+            title: 'Resistor calculator'
+            md_bg_color: app.theme_cls.primary_color
+            background_palette: 'Primary'
+            background_hue: '500'
+            left_action_items: [['menu', lambda x: app.root.toggle_nav_drawer()]]
+        ScreenManagement:
+            id: manager
+            size_hint: 1, 0.5
+            FourRingsScreen:
+                id: 4rings
+            FiveRingsScreen:
+                id: 5rings
+            SMDScreen:
+                id: smd
+            AboutScreen:
+                id: about
+            SettingsScreen:
+                id: settings
+'''
 BUTTON_COLORS = (  # все возможные цвета для колец резистора
     (.70, .70, .70, 1),  # серебряный
     (.94, .64, .4, 1),  # золотой
@@ -387,35 +476,44 @@ class SMDScreen(Scr):
         return value * multiplier
 
 
+class SettingsScreen(Screen):
+    def __init__(self, **kwargs):
+        super(SettingsScreen, self).__init__(**kwargs)
+
+
+class AboutScreen(Screen):
+    def __init__(self, **kwargs):
+        super(AboutScreen, self).__init__(**kwargs)
+
+
 class ScreenManagement(ScreenManager):
     def __init__(self, **kwargs):
         super(ScreenManagement, self).__init__(**kwargs)
         self.add_widget(FourRingsScreen(name="4rings"))
         self.add_widget(FiveRingsScreen(name="5rings"))
         self.add_widget(SMDScreen(name="smd"))
-
-
-class Navigator(NavigationDrawer):
-    title = StringProperty('Navigation')
+        self.add_widget(SettingsScreen(name="settings"))
+        self.add_widget(AboutScreen(name="about"))
 
 
 class ResCalcApp(App):
     theme_cls = ThemeManager()
-    nav_drawer = ObjectProperty()
+    previous_date = ObjectProperty()
+    title = "ResCalc"
+    icon = "data/icon.png"
 
     def build(self):
+        main_widget = Builder.load_string(main_widget_kv)
         self.theme_cls.theme_style = 'Dark'
-        self.icon = "data/icon.png"
-        self.load_kv_files(KV_DIR)
-        main_widget = Builder.load_file(os.path.join(KV_DIR, "startscreen.kv"))
-        self.nav_drawer = Navigator()
         return main_widget
 
-    def load_kv_files(self, directory_kv_files):
-        Builder.load_file(os.path.join(directory_kv_files, "startscreen.kv"))
-        Builder.load_file(os.path.join(directory_kv_files, "navigationdrawer.kv"))
-        Builder.load_file(os.path.join(directory_kv_files, "smd.kv"))
-        Builder.load_file(os.path.join(directory_kv_files, "navigator_menu.kv"))
+    def settings(self):
+        self.root.ids.manager.current = 'settings'
+        return True
+
+    def about(self):
+        self.root.ids.manager.current = 'about'
+        return True
 
     def smd(self):
         self.root.ids.manager.current = 'smd'
@@ -430,5 +528,5 @@ class ResCalcApp(App):
         return True
 
 
-if __name__ == '__main__':  # если программа была запущена , а не импортирована, то
-    ResCalcApp().run()  # запускаем kivy приложение
+if __name__ == '__main__':
+    ResCalcApp().run()
