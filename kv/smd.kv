@@ -1,0 +1,21 @@
+<SMDScreen>:
+    BoxLayout:
+        orientation:"vertical"
+        Label:
+            id:result
+            text: root.result
+            font_size:'25sp'
+            size_hint_y:None
+        FloatLayout:
+            TextInput:
+                multiline:False
+                text:"101"
+                size_hint:(None, None)
+                size:(150, 80)
+                padding:[15, 10, 10, 15]
+                background_color:(0, 0, 0, 1)
+                cursor_color:(1, 1, 1, 1)
+                foreground_color:(1, 1, 1, 1)
+                pos_hint:{'center_x': .5, 'y': .5}
+                font_size:50
+                on_text_validate:root.calculation(self)

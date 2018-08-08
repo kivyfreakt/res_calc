@@ -20,96 +20,6 @@ sys.setdefaultencoding('utf8')
 
 # ------------------------ Константы и переменные ------------------------
 
-main_widget_kv = '''
-#:import Toolbar kivymd.toolbar.Toolbar
-#:import ThemeManager kivymd.theming.ThemeManager
-#:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
-#:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
-#:import NavigationDrawerDivider kivymd.navigationdrawer.NavigationDrawerDivider
-#:import NavigationDrawerToolbar kivymd.navigationdrawer.NavigationDrawerToolbar
-#:import NavigationDrawerSubheader kivymd.navigationdrawer.NavigationDrawerSubheader
-#:import MDCheckbox kivymd.selectioncontrols.MDCheckbox
-#:import MDSwitch kivymd.selectioncontrols.MDSwitch
-#:import MDList kivymd.list.MDList
-#:import OneLineListItem kivymd.list.OneLineListItem
-#:import TwoLineListItem kivymd.list.TwoLineListItem
-#:import ThreeLineListItem kivymd.list.ThreeLineListItem
-#:import OneLineAvatarListItem kivymd.list.OneLineAvatarListItem
-#:import OneLineIconListItem kivymd.list.OneLineIconListItem
-#:import OneLineAvatarIconListItem kivymd.list.OneLineAvatarIconListItem
-#:import MDTextField kivymd.textfields.MDTextField
-#:import MDSpinner kivymd.spinner.MDSpinner
-#:import MDCard kivymd.card.MDCard
-#:import MDSeparator kivymd.card.MDSeparator
-#:import MDDropdownMenu kivymd.menu.MDDropdownMenu
-#:import get_color_from_hex kivy.utils.get_color_from_hex
-#:import colors kivymd.color_definitions.colors
-#:import SmartTile kivymd.grid.SmartTile
-#:import MDSlider kivymd.slider.MDSlider
-#:import MDTabbedPanel kivymd.tabs.MDTabbedPanel
-#:import MDTab kivymd.tabs.MDTab
-#:import MDProgressBar kivymd.progressbar.MDProgressBar
-#:import MDAccordion kivymd.accordion.MDAccordion
-#:import MDAccordionItem kivymd.accordion.MDAccordionItem
-#:import MDAccordionSubItem kivymd.accordion.MDAccordionSubItem
-#:import MDThemePicker kivymd.theme_picker.MDThemePicker
-#:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
-#:import MDBottomNavigationItem kivymd.tabs.MDBottomNavigationItem
-
-NavigationLayout:
-    id: nav_layout
-    MDNavigationDrawer:
-        id: nav_drawer
-        NavigationDrawerToolbar:
-            title: "Navigation"
-        NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
-            text: "4 rings"
-            on_release: app.four_rings()
-        NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
-            text: "5 rings"
-            on_release: app.five_rings()
-        NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
-            text: "smd"
-            on_release: app.smd()
-        NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
-            text: "about"
-            on_release: app.about()
-        NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
-            text: "settings"
-            on_release: app.settings()
-        NavigationDrawerIconButton:
-            icon: 'checkbox-blank-circle'
-            text: "exit"
-            on_release: app.stop()
-
-    BoxLayout:
-        orientation: 'vertical'
-        Toolbar:
-            id: toolbar
-            title: 'Resistor calculator'
-            md_bg_color: app.theme_cls.primary_color
-            background_palette: 'Primary'
-            background_hue: '500'
-            left_action_items: [['menu', lambda x: app.root.toggle_nav_drawer()]]
-        ScreenManagement:
-            id: manager
-            size_hint: 1, 0.5
-            FourRingsScreen:
-                id: 4rings
-            FiveRingsScreen:
-                id: 5rings
-            SMDScreen:
-                id: smd
-            AboutScreen:
-                id: about
-            SettingsScreen:
-                id: settings
-'''
 BUTTON_COLORS = (  # все возможные цвета для колец резистора
     (.70, .70, .70, 1),  # серебряный
     (.94, .64, .4, 1),  # золотой
@@ -503,9 +413,14 @@ class ResCalcApp(App):
     icon = "data/icon.png"
 
     def build(self):
-        main_widget = Builder.load_string(main_widget_kv)
+        self.load_kv_files(KV_DIR)
+        main_widget = Builder.load_file(os.path.join(KV_DIR, "startscreen.kv"))
         self.theme_cls.theme_style = 'Dark'
         return main_widget
+
+    def load_kv_files(self, directory_kv_files):
+        Builder.load_file(os.path.join(directory_kv_files, "startscreen.kv"))
+        Builder.load_file(os.path.join(directory_kv_files, "smd.kv"))
 
     def settings(self):
         self.root.ids.manager.current = 'settings'
