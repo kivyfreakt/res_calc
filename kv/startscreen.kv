@@ -1,0 +1,72 @@
+#:import Toolbar kivymd.toolbar.Toolbar
+#:import ThemeManager kivymd.theming.ThemeManager
+#:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
+#:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
+#:import NavigationDrawerDivider kivymd.navigationdrawer.NavigationDrawerDivider
+#:import NavigationDrawerToolbar kivymd.navigationdrawer.NavigationDrawerToolbar
+#:import NavigationDrawerSubheader kivymd.navigationdrawer.NavigationDrawerSubheader
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import colors kivymd.color_definitions.colors
+#:import SmartTile kivymd.grid.SmartTile
+#:import MDSlider kivymd.slider.MDSlider
+#:import MDTabbedPanel kivymd.tabs.MDTabbedPanel
+#:import MDTab kivymd.tabs.MDTab
+#:import MDProgressBar kivymd.progressbar.MDProgressBar
+#:import MDThemePicker kivymd.theme_picker.MDThemePicker
+#:import MDBottomNavigation kivymd.tabs.MDBottomNavigation
+#:import MDBottomNavigationItem kivymd.tabs.MDBottomNavigationItem
+
+
+NavigationLayout:
+    id: nav_layout
+    MDNavigationDrawer:
+        id: nav_drawer
+        NavigationDrawerToolbar:
+            title: "Navigation"
+        NavigationDrawerIconButton:
+            icon: 'numeric-4-box'
+            text: "4 rings"
+            on_release: app.four_rings()
+        NavigationDrawerIconButton:
+            icon: 'numeric-5-box'
+            text: "5 rings"
+            on_release: app.five_rings()
+        NavigationDrawerIconButton:
+            icon: 'checkbox-blank'
+            text: "SMD"
+            on_release: app.smd()
+        NavigationDrawerIconButton:
+            icon: 'clipboard-text'
+            text: "About"
+            on_release: app.about()
+        NavigationDrawerIconButton:
+            icon: 'settings-box'
+            text: "Settings"
+            on_release: app.settings()
+        NavigationDrawerIconButton:
+            icon: 'close-box'
+            text: "Exit"
+            on_release: app.stop()
+
+    BoxLayout:
+        orientation: 'vertical'
+        Toolbar:
+            id: toolbar
+            title: 'Resistor calculator'
+            md_bg_color: app.theme_cls.primary_color
+            background_palette: 'Primary'
+            background_hue: '500'
+            left_action_items: [['menu', lambda x: app.root.toggle_nav_drawer()]]
+        ScreenManagement:
+            id: manager
+            size_hint: 1, 0.5
+            FourRingsScreen:
+                id: 4rings
+            FiveRingsScreen:
+                id: 5rings
+            SMDScreen:
+                id: smd
+            AboutScreen:
+                id: about
+            SettingsScreen:
+                id: settings

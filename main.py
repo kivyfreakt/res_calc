@@ -1,18 +1,29 @@
 # -*- coding: utf-8 -*-
-
-# ------------------------ Библиотеки ------------------------
+import os
+import sys
 from kivy.app import App
+from kivy.lang import Builder
+from kivy.properties import ObjectProperty, StringProperty
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.floatlayout import FloatLayout
-from kivy.core.window import Window
 from kivy.uix.button import Button
-from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
-from kivy.uix.actionbar import ActionBar, ActionButton, ActionView, ActionPrevious, ActionGroup
-from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+from kivymd.button import MDIconButton
+from kivymd.snackbar import Snackbar
+from kivymd.theming import ThemeManager
+from kivymd.label import MDLabel
+from kivymd.list import ILeftBodyTouch
+
+ROOT_DIR = os.path.dirname(__file__)
+KV_DIR = os.path.join(ROOT_DIR, "kv")
+
+reload(sys)
+sys.setdefaultencoding('utf8')
+
+__version__ = '0.1.1'
 
 # ------------------------ Константы и переменные ------------------------
+
 BUTTON_COLORS = (  # все возможные цвета для колец резистора
     (.70, .70, .70, 1),  # серебряный
     (.94, .64, .4, 1),  # золотой
@@ -42,6 +53,8 @@ MULTIPLIERS = (  # все возможные множители резистор
     1000000000
 )
 
+BUTTON_MULTIPLIERS = ('x0.01', 'x0.1', 'x1', 'x10', 'x100', 'x1k', 'x10k', 'x100k', 'x1M', 'x10M', 'x100M', 'x1G')
+
 TOLERANCES = ("10%", "5%", "1%", "2%", "0.5%", "0.25%", "0.1%", "0.05%")  # все возможные значения допусков резистора
 
 NUM_ROWS = 12  # количество рядов столбца
@@ -66,16 +79,16 @@ class Scr(Screen):
 
     def format_result(self, value):
         '''Изменение значений сопротивлений в более удобный вид'''
-        s = " Oм ± "
+        s = " Om "
         if value >= MULTIPLIERS[11]:  # если сопротивление больше 10^8 , то
             value /= MULTIPLIERS[11]  # делим сопротивление на 10^8 и
-            s = " ГOм ± "             # добавляем десятичную приставку
+            s = " GOm "             # добавляем десятичную приставку
         elif value >= MULTIPLIERS[8]:
             value /= MULTIPLIERS[8]
-            s = " МOм ± "
+            s = " MOm "
         elif value >= MULTIPLIERS[5]:
             value /= MULTIPLIERS[5]
-            s = " кOм ± "
+            s = " kOm "
         if self.is_int(value):  # если значение целое число, то
             value = int(value)  # округляем float до int
         return (str(value) + s)
@@ -93,7 +106,6 @@ class FourRingsScreen(Scr):
                 Метод, производящий вычисление сопротивления,
                 по заданным параметрам резистора
     '''
-
     def __init__(self, **kwargs):
         super(FourRingsScreen, self).__init__(**kwargs)
         NUM_COLS = 4  # количество столбцов
@@ -102,18 +114,18 @@ class FourRingsScreen(Scr):
 
         parent = BoxLayout(orientation="vertical")
         params_table = BoxLayout()  # таблица с параметрами резистора
-        self.result = Label(text="1 Ом ± 1%", font_size='25sp', size_hint_y=None)  # результат вычислений сопротивления
+        self.result = MDLabel(text='1 Om ± 1%', font_style='Display1', theme_text_color='Primary', halign='center', size_hint_y=None)  # результат вычислений сопротивления
 
         # СОЗДАЕМ ТАБЛИЦУ С ПАРАМЕТРАМИ РЕЗИСТОРА
         column = 0  # текущий столбец
         for column in range(NUM_COLS):  # пока текущий столбец меньше или равен общему количеству столбцов, то
             col = GridLayout(id=str(column), cols=1, spacing=5, padding=[5, 5, 5, 5])
-            col.add_widget(Label(text=self.cols_heads[column]))  # Создаем Label с названием текущего столбца
+            col.add_widget(MDLabel(font_style='Body1', theme_text_color='Primary', text=self.cols_heads[column], halign='center'))  # Создаем Label с названием текущего столбца
             if column < 2:  # если текущий столбец меньше 3 , то
                 row = 2  # текущий ряд столбца
                 button = 0  # текущая позиция кнопки в столбце
-                col.add_widget(Label(text="-"))  # выводим 2 Label с -, т.к
-                col.add_widget(Label(text="-"))  # первых двух кнопок нет
+                col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))  # выводим 2 Label с -, т.к
+                col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))  # первых двух кнопок нет
                 while row < NUM_ROWS:  # пока текущий ряд меньше 12, то
                     if row == 6 or row == 11:  # если ряд 6 или 11, то
                         col.add_widget(  # создаем кнопку с черным текстом(чтоб белый текст не сливался с желтым и белым цветом кнопки)
@@ -141,7 +153,7 @@ class FourRingsScreen(Scr):
                         col.add_widget(  # создаем кнопку с черным текстом(чтоб белый текст не сливался с желтым и белым цветом кнопки)
                             Button(
                                 id=str(column),
-                                text=str(MULTIPLIERS[row]),
+                                text=BUTTON_MULTIPLIERS[row],
                                 background_normal='',
                                 background_color=BUTTON_COLORS[row],
                                 color=(0, 0, 0, 1),
@@ -150,7 +162,7 @@ class FourRingsScreen(Scr):
                         col.add_widget(
                             Button(  # иначе создаем кнопку с белым текстом
                                 id=str(column),
-                                text=str(MULTIPLIERS[row]),
+                                text=BUTTON_MULTIPLIERS[row],
                                 background_normal='',
                                 background_color=BUTTON_COLORS[row],
                                 on_release=self.calculation))
@@ -159,7 +171,7 @@ class FourRingsScreen(Scr):
                 button = 0  # текущая позиция кнопки в столбце
                 for row in range(NUM_ROWS):  # пока текущий ряд меньше 12, то
                     if (row == 2 or row == 5 or row == 6 or row == 11):   # если номер ряда 2, 5, 6 или 11, то
-                        col.add_widget(Label(text="-"))  # отображаем заглушку вместо кнопки
+                        col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))  # отображаем заглушку вместо кнопки
                     else:
                         col.add_widget(  # иначе отображаем кнопку
                             Button(
@@ -179,7 +191,7 @@ class FourRingsScreen(Scr):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
         self.resistor_params[int(instance.id)] = str(instance.text)   # устанавливаем параметры резистора
         resistance = int(self.resistor_params[0] + self.resistor_params[1]) * float(self.resistor_params[2])   # первые 2 значения резистора умножаем на множитель
-        self.result.text = self.format_result(resistance) + self.resistor_params[3]   # изменяем значение Label
+        self.result.text = self.format_result(resistance) + "± " + self.resistor_params[3]   # изменяем значение Label
 
 
 class FiveRingsScreen(Scr):
@@ -190,7 +202,6 @@ class FiveRingsScreen(Scr):
                 Метод, производящий вычисление сопротивления,
                 по заданным параметрам резистора
     '''
-
     def __init__(self, **kwargs):
         super(FiveRingsScreen, self).__init__(**kwargs)
         NUM_COLS = 5
@@ -199,17 +210,17 @@ class FiveRingsScreen(Scr):
         self.cols_heads = ["1st ring", "2nd ring", "3rd ring", "Multiplier", "Tolerance"]
         parent = BoxLayout(orientation="vertical")
         params_table = BoxLayout()
-        self.result = Label(text="1 Ом ± 1%", font_size='25sp', size_hint_y=None)
+        self.result = MDLabel(text='1 Om ± 1%', font_style='Display1', theme_text_color='Primary', halign='center', size_hint_y=None)
 
         column = 0
         for column in range(NUM_COLS):
             col = GridLayout(id=str(column), cols=1, spacing=5, padding=[5, 5, 5, 5])
-            col.add_widget(Label(text=self.cols_heads[column]))
+            col.add_widget(MDLabel(font_style='Body1', theme_text_color='Primary', text=self.cols_heads[column], halign='center'))
             if column < 3:
                 row = 2
                 button = 0
-                col.add_widget(Label(text="-"))
-                col.add_widget(Label(text="-"))
+                col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))
+                col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))
                 while row < NUM_ROWS:
                     if row == 6 or row == 11:
                         col.add_widget(
@@ -237,7 +248,7 @@ class FiveRingsScreen(Scr):
                         col.add_widget(
                             Button(
                                 id=str(column),
-                                text=str(MULTIPLIERS[row]),
+                                text=BUTTON_MULTIPLIERS[row],
                                 background_normal='',
                                 background_color=BUTTON_COLORS[row],
                                 color=(0, 0, 0, 1),
@@ -246,7 +257,7 @@ class FiveRingsScreen(Scr):
                         col.add_widget(
                             Button(
                                 id=str(column),
-                                text=str(MULTIPLIERS[row]),
+                                text=BUTTON_MULTIPLIERS[row],
                                 background_normal='',
                                 background_color=BUTTON_COLORS[row],
                                 on_release=self.calculation))
@@ -255,7 +266,7 @@ class FiveRingsScreen(Scr):
                 button = 0
                 for row in range(NUM_ROWS):
                     if (row == 2 or row == 5 or row == 6 or row == 11):
-                        col.add_widget(Label(text="-"))
+                        col.add_widget(MDLabel(text="-", font_style='Body1', theme_text_color='Primary', halign='center'))
                     else:
                         col.add_widget(
                             Button(
@@ -275,7 +286,7 @@ class FiveRingsScreen(Scr):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
         self.resistor_params[int(instance.id)] = str(instance.text)  # устанавливаем параметры резистора
         resistance = int(self.resistor_params[0] + self.resistor_params[1] + self.resistor_params[2]) * float(self.resistor_params[3])  # первые 3 значения резистора умножаем на множитель
-        self.result.text = self.format_result(resistance) + self.resistor_params[4]  # изменяем значение Label
+        self.result.text = self.format_result(resistance) + "± " + self.resistor_params[4]  # изменяем значение Label
 
 
 class SMDScreen(Scr):
@@ -291,28 +302,11 @@ class SMDScreen(Scr):
                 значения, совпадающие с кодом digits, и множитель.
                 Возвращаем произведение значения и множителя
     '''
+    result = StringProperty()
 
     def __init__(self, **kwargs):
         super(SMDScreen, self).__init__(**kwargs)
-        parent = BoxLayout(orientation="vertical")
-        self.result = Label(text="100 Ом ± 5%", font_size='25sp', size_hint_y=None)
-        box = FloatLayout()
-        value_textbox = TextInput(
-            multiline=False,
-            text="101",
-            size_hint=(None, None),
-            size=(150, 80),
-            padding=[15, 10, 10, 15],
-            background_color=(0, 0, 0, 1),
-            cursor_color=(1, 1, 1, 1),
-            foreground_color=(1, 1, 1, 1),
-            pos_hint={'center_x': .5, 'y': .5},
-            font_size=50,
-            on_text_validate=self.calculation)
-        box.add_widget(value_textbox)
-        parent.add_widget(self.result)
-        parent.add_widget(box)
-        self.add_widget(parent)
+        self.result = ""
 
     def calculation(self, instance):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
@@ -326,7 +320,7 @@ class SMDScreen(Scr):
             elif len(user_input) == 4:  # если длина user_input - 4 , то
                 resistance = int(user_input[0] + user_input[1] + user_input[2]) * pow(10, int(user_input[3]))   # первые три числа из полученного значения умножаем на 10 в степени 4 числа
                 tolerance = TOLERANCES[2]
-            self.result.text = self.format_result(resistance) + tolerance  # изменяем значение Label
+            self.result = self.format_result(resistance) + "± " + tolerance  # изменяем значение Label
         else:  # если полученное значение не полностью число , то
             try:
                 if (user_input.index("R") >= 0) and not(user_input.index("R") == len(user_input) - 1):  # если в полученном значении если Буква R и она находится не на последнем месте, то
@@ -334,7 +328,7 @@ class SMDScreen(Scr):
                         resistance = float(user_input.replace("R", "0."))  # заменяем букву R в строке на 0.
                     else:
                         resistance = float(user_input.replace("R", "."))  # иначе заменяем букву R в строке на .
-                    self.result.text = self.format_result(resistance) + tolerance  # изменяем значение Label
+                    self.result = self.format_result(resistance)  # изменяем значение Label
             except ValueError:  # если буквы R в строке нет, то
                 if len(user_input) == 3:  # если длина строки - 3
                     tolerance = TOLERANCES[2]
@@ -342,7 +336,7 @@ class SMDScreen(Scr):
                     letter_code = user_input[2]  # последний символ в строке
                     if digits_code.isdigit():  # если первые два символа в строке - число
                         resistance = self.get_code_value(digits_code, letter_code)  # находим в таблице значения и получаем результат
-                    self.result.text = self.format_result(resistance) + tolerance  # изменяем значение Label
+                    self.result = self.format_result(resistance) + "± " + tolerance  # изменяем значение Label
 
     def get_code_value(self, digits, letter):
         ''' Получение значения сопротивления резистора
@@ -393,42 +387,80 @@ class SMDScreen(Scr):
             multiplier = MULTIPLIERS[7]
         return value * multiplier
 
+    def update_padding(self, text_input, *args):
+        text_width = text_input._get_text_width(
+            text_input.text,
+            text_input.tab_width,
+            text_input._label_cached
+        )
+        text_input.padding_x = (text_input.width - text_width) / 2
 
-class RescalcApp(App):
-    ''' Основной класс приложения'''
+
+class SettingsScreen(Screen):
+    def __init__(self, **kwargs):
+        super(SettingsScreen, self).__init__(**kwargs)
+
+
+class AboutScreen(Screen):
+    def __init__(self, **kwargs):
+        super(AboutScreen, self).__init__(**kwargs)
+
+
+class ScreenManagement(ScreenManager):
+    def __init__(self, **kwargs):
+        super(ScreenManagement, self).__init__(**kwargs)
+        self.add_widget(FourRingsScreen(name="4rings"))
+        self.add_widget(FiveRingsScreen(name="5rings"))
+        self.add_widget(SMDScreen(name="smd"))
+        self.add_widget(SettingsScreen(name="settings"))
+        self.add_widget(AboutScreen(name="about"))
+
+
+class ResCalcApp(App):
+    theme_cls = ThemeManager()
+    previous_date = ObjectProperty()
+    title = "ResCalc"
+    icon = "data/icon.png"
+
     def build(self):
-        self.icon = "icon.png"  # иконка проложения
-        Window.clearcolor = (.19, .19, .19, 1)  # фоновой цвет приложения
-        parent = BoxLayout(orientation="vertical")
-        action_bar = ActionBar()
-        action_view = ActionView()
-        action_group = ActionGroup(text="Normal")
-        self.screen_manager = ScreenManager(transition=NoTransition())  # виджет управления окнами
-        four_rings_screen = FourRingsScreen(name='4rings')  # окно для расчета сопротивления резистора с 4 кольцами
-        five_rings_screen = FiveRingsScreen(name='5rings')  # окно для расчета сопротивления резистора с 5 кольцами
-        smd_screen = SMDScreen(name="smd")  # окно для расчета сопротивления smd резистора
-        self.screen_manager.add_widget(four_rings_screen)
-        self.screen_manager.add_widget(five_rings_screen)
-        self.screen_manager.add_widget(smd_screen)
-        action_view.add_widget(ActionPrevious(with_previous=False, app_icon="icon.png"))
-        action_group.add_widget(ActionButton(id="4", text="4 rings", on_press=self.changer))
-        action_group.add_widget(ActionButton(id="5", text="5 rings", on_press=self.changer))
-        action_view.add_widget(action_group)
-        action_view.add_widget(ActionButton(id="smd", text="SMD", on_press=self.changer))
-        action_bar.add_widget(action_view)
-        parent.add_widget(action_bar)
-        parent.add_widget(self.screen_manager)
-        return parent
+        self.load_kv_files(KV_DIR)
+        main_widget = Builder.load_file(os.path.join(KV_DIR, "startscreen.kv"))
+        self.theme_cls.theme_style = 'Dark'
+        return main_widget
 
-    def changer(self, instance):
-        '''Смена различных видов окон приложения'''
-        if instance.id == "4":
-            self.screen_manager.current = '4rings'
-        if instance.id == "5":
-            self.screen_manager.current = '5rings'
-        elif instance.id == "smd":
-            self.screen_manager.current = 'smd'
+    def load_kv_files(self, directory_kv_files):
+        Builder.load_file(os.path.join(directory_kv_files, "startscreen.kv"))
+        Builder.load_file(os.path.join(directory_kv_files, "smd.kv"))
+        Builder.load_file(os.path.join(directory_kv_files, "settings.kv"))
+        Builder.load_file(os.path.join(directory_kv_files, "about.kv"))
+
+    def settings(self):
+        self.root.ids.manager.current = 'settings'
+        return True
+
+    def about(self):
+        self.root.ids.manager.current = 'about'
+        return True
+
+    def smd(self):
+        self.root.ids.manager.current = 'smd'
+        return True
+
+    def four_rings(self):
+        self.root.ids.manager.current = '4rings'
+        return True
+
+    def five_rings(self):
+        self.root.ids.manager.current = '5rings'
+        return True
+
+    def show_snackbar(self, snack_text):
+        Snackbar(text=snack_text).show()
 
 
-if __name__ == '__main__':  # если программа была запущена , а не импортирована, то
-    RescalcApp().run()  # запускаем kivy приложение
+class IconLeftSampleWidget(ILeftBodyTouch, MDIconButton):
+    pass
+
+
+if __name__ == '__main__':
+    ResCalcApp().run()
