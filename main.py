@@ -8,9 +8,11 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
-from kivy.uix.label import Label
+from kivymd.button import MDIconButton
+from kivymd.snackbar import Snackbar
 from kivymd.theming import ThemeManager
 from kivymd.label import MDLabel
+from kivymd.list import ILeftBodyTouch
 
 ROOT_DIR = os.path.dirname(__file__)
 KV_DIR = os.path.join(ROOT_DIR, "kv")
@@ -18,6 +20,7 @@ KV_DIR = os.path.join(ROOT_DIR, "kv")
 reload(sys)
 sys.setdefaultencoding('utf8')
 
+__version__ = '0.1.1'
 
 # ------------------------ Константы и переменные ------------------------
 
@@ -50,6 +53,8 @@ MULTIPLIERS = (  # все возможные множители резистор
     1000000000
 )
 
+BUTTON_MULTIPLIERS = ('x0.01', 'x0.1', 'x1', 'x10', 'x100', 'x1k', 'x10k', 'x100k', 'x1M', 'x10M', 'x100M', 'x1G')
+
 TOLERANCES = ("10%", "5%", "1%", "2%", "0.5%", "0.25%", "0.1%", "0.05%")  # все возможные значения допусков резистора
 
 NUM_ROWS = 12  # количество рядов столбца
@@ -75,16 +80,16 @@ class Scr(Screen):
 
     def format_result(self, value):
         '''Изменение значений сопротивлений в более удобный вид'''
-        s = " Om ± "
+        s = " Om "
         if value >= MULTIPLIERS[11]:  # если сопротивление больше 10^8 , то
             value /= MULTIPLIERS[11]  # делим сопротивление на 10^8 и
-            s = " GOm ± "             # добавляем десятичную приставку
+            s = " GOm "             # добавляем десятичную приставку
         elif value >= MULTIPLIERS[8]:
             value /= MULTIPLIERS[8]
-            s = " MOm ± "
+            s = " MOm "
         elif value >= MULTIPLIERS[5]:
             value /= MULTIPLIERS[5]
-            s = " kOm ± "
+            s = " kOm "
         if self.is_int(value):  # если значение целое число, то
             value = int(value)  # округляем float до int
         return (str(value) + s)
@@ -150,7 +155,7 @@ class FourRingsScreen(Scr):
                         col.add_widget(  # создаем кнопку с черным текстом(чтоб белый текст не сливался с желтым и белым цветом кнопки)
                             Button(
                                 id=str(column),
-                                text=str(MULTIPLIERS[row]),
+                                text=BUTTON_MULTIPLIERS[row],
                                 background_normal='',
                                 background_color=BUTTON_COLORS[row],
                                 color=(0, 0, 0, 1),
@@ -159,7 +164,7 @@ class FourRingsScreen(Scr):
                         col.add_widget(
                             Button(  # иначе создаем кнопку с белым текстом
                                 id=str(column),
-                                text=str(MULTIPLIERS[row]),
+                                text=BUTTON_MULTIPLIERS[row],
                                 background_normal='',
                                 background_color=BUTTON_COLORS[row],
                                 on_release=self.calculation))
@@ -188,7 +193,7 @@ class FourRingsScreen(Scr):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
         self.resistor_params[int(instance.id)] = str(instance.text)   # устанавливаем параметры резистора
         resistance = int(self.resistor_params[0] + self.resistor_params[1]) * float(self.resistor_params[2])   # первые 2 значения резистора умножаем на множитель
-        self.result.text = self.format_result(resistance) + self.resistor_params[3]   # изменяем значение Label
+        self.result.text = self.format_result(resistance) + "± " + self.resistor_params[3]   # изменяем значение Label
 
 
 class FiveRingsScreen(Scr):
@@ -246,7 +251,7 @@ class FiveRingsScreen(Scr):
                         col.add_widget(
                             Button(
                                 id=str(column),
-                                text=str(MULTIPLIERS[row]),
+                                text=BUTTON_MULTIPLIERS[row],
                                 background_normal='',
                                 background_color=BUTTON_COLORS[row],
                                 color=(0, 0, 0, 1),
@@ -255,7 +260,7 @@ class FiveRingsScreen(Scr):
                         col.add_widget(
                             Button(
                                 id=str(column),
-                                text=str(MULTIPLIERS[row]),
+                                text=BUTTON_MULTIPLIERS[row],
                                 background_normal='',
                                 background_color=BUTTON_COLORS[row],
                                 on_release=self.calculation))
@@ -284,7 +289,7 @@ class FiveRingsScreen(Scr):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
         self.resistor_params[int(instance.id)] = str(instance.text)  # устанавливаем параметры резистора
         resistance = int(self.resistor_params[0] + self.resistor_params[1] + self.resistor_params[2]) * float(self.resistor_params[3])  # первые 3 значения резистора умножаем на множитель
-        self.result.text = self.format_result(resistance) + self.resistor_params[4]  # изменяем значение Label
+        self.result.text = self.format_result(resistance) + "± " + self.resistor_params[4]  # изменяем значение Label
 
 
 class SMDScreen(Scr):
@@ -305,7 +310,7 @@ class SMDScreen(Scr):
 
     def __init__(self, **kwargs):
         super(SMDScreen, self).__init__(**kwargs)
-        self.result = "100 Ом ± 5%"
+        self.result = ""
 
     def calculation(self, instance):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
@@ -319,7 +324,7 @@ class SMDScreen(Scr):
             elif len(user_input) == 4:  # если длина user_input - 4 , то
                 resistance = int(user_input[0] + user_input[1] + user_input[2]) * pow(10, int(user_input[3]))   # первые три числа из полученного значения умножаем на 10 в степени 4 числа
                 tolerance = TOLERANCES[2]
-            self.result = self.format_result(resistance) + tolerance  # изменяем значение Label
+            self.result = self.format_result(resistance) + "± " + tolerance  # изменяем значение Label
         else:  # если полученное значение не полностью число , то
             try:
                 if (user_input.index("R") >= 0) and not(user_input.index("R") == len(user_input) - 1):  # если в полученном значении если Буква R и она находится не на последнем месте, то
@@ -327,7 +332,7 @@ class SMDScreen(Scr):
                         resistance = float(user_input.replace("R", "0."))  # заменяем букву R в строке на 0.
                     else:
                         resistance = float(user_input.replace("R", "."))  # иначе заменяем букву R в строке на .
-                    self.result = self.format_result(resistance) + tolerance  # изменяем значение Label
+                    self.result = self.format_result(resistance)  # изменяем значение Label
             except ValueError:  # если буквы R в строке нет, то
                 if len(user_input) == 3:  # если длина строки - 3
                     tolerance = TOLERANCES[2]
@@ -335,7 +340,7 @@ class SMDScreen(Scr):
                     letter_code = user_input[2]  # последний символ в строке
                     if digits_code.isdigit():  # если первые два символа в строке - число
                         resistance = self.get_code_value(digits_code, letter_code)  # находим в таблице значения и получаем результат
-                    self.result = self.format_result(resistance) + tolerance  # изменяем значение Label
+                    self.result = self.format_result(resistance) + "± " + tolerance  # изменяем значение Label
 
     def get_code_value(self, digits, letter):
         ''' Получение значения сопротивления резистора
@@ -386,6 +391,14 @@ class SMDScreen(Scr):
             multiplier = MULTIPLIERS[7]
         return value * multiplier
 
+    def update_padding(self, text_input, *args):
+        text_width = text_input._get_text_width(
+            text_input.text,
+            text_input.tab_width,
+            text_input._label_cached
+        )
+        text_input.padding_x = (text_input.width - text_width) / 2
+
 
 class SettingsScreen(Screen):
     def __init__(self, **kwargs):
@@ -423,6 +436,7 @@ class ResCalcApp(App):
         Builder.load_file(os.path.join(directory_kv_files, "startscreen.kv"))
         Builder.load_file(os.path.join(directory_kv_files, "smd.kv"))
         Builder.load_file(os.path.join(directory_kv_files, "settings.kv"))
+        Builder.load_file(os.path.join(directory_kv_files, "about.kv"))
 
     def settings(self):
         self.root.ids.manager.current = 'settings'
@@ -443,6 +457,13 @@ class ResCalcApp(App):
     def five_rings(self):
         self.root.ids.manager.current = '5rings'
         return True
+
+    def show_snackbar(self, snack_text):
+        Snackbar(text=snack_text).show()
+
+
+class IconLeftSampleWidget(ILeftBodyTouch, MDIconButton):
+    pass
 
 
 if __name__ == '__main__':

@@ -6,5 +6,17 @@
             id: ml
             TwoLineIconListItem:
                 text: 'Change theme'
-                secondary_text: "Current: " + app.theme_cls.theme_style + ", " + app.theme_cls.primary_palette
-                on_release: app.theme_cls.theme_style = 'Dark' if app.theme_cls.theme_style == 'Light' else 'Light'
+                secondary_text: "Current: " + app.theme_cls.theme_style
+                on_release: 
+                    app.theme_cls.theme_style = 'Dark' if app.theme_cls.theme_style == 'Light' else 'Light'
+                    app.show_snackbar('Your theme was changed to '+app.theme_cls.theme_style)
+                IconLeftSampleWidget:
+                    icon: 'weather-night' if app.theme_cls.theme_style == 'Light' else 'weather-sunny'
+            TwoLineIconListItem:
+                text: 'Change primary palette'
+                secondary_text: "Current: " + app.theme_cls.primary_palette
+                on_release: 
+                    app.theme_cls.primary_palette = 'Blue' if app.theme_cls.primary_palette == 'Teal' else 'Teal'
+                    app.show_snackbar('Your primary palette was changed to '+ app.theme_cls.primary_palette)
+                IconLeftSampleWidget:
+                    icon: 'palette'
