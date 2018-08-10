@@ -13,6 +13,7 @@ from kivymd.snackbar import Snackbar
 from kivymd.theming import ThemeManager
 from kivymd.label import MDLabel
 from kivymd.list import ILeftBodyTouch
+from kivymd.tabs import MDTab
 
 ROOT_DIR = os.path.dirname(__file__)
 KV_DIR = os.path.join(ROOT_DIR, "kv")
@@ -69,6 +70,9 @@ class Scr(Screen):
             format_result(self, value):
                 Изменение значений сопротивлений(value) в
                 более удобный и понятный вид.
+            format_mult(self, value):
+                Изменение значений множителя
+                с кнопки в численный вид
             is_int(self, value):
                 Проверка того, является ли переменная(value) целочисленной или нет
     '''
@@ -94,7 +98,7 @@ class Scr(Screen):
         return (str(value) + s)
 
     def format_mult(self, value):
-        '''Изменение значений сопротивлений в более удобный вид'''
+        '''Изменение значений множителя с кнопки в численный вид'''
         value = BUTTON_MULTIPLIERS.index(value)
         return (MULTIPLIERS[value])
 
@@ -401,6 +405,11 @@ class SMDScreen(Scr):
         text_input.padding_x = (text_input.width - text_width) / 2
 
 
+class ColorScreen(Scr):
+    def __init__(self, **kwargs):
+        super(ColorScreen, self).__init__(**kwargs)
+
+
 class SettingsScreen(Screen):
     def __init__(self, **kwargs):
         super(SettingsScreen, self).__init__(**kwargs)
@@ -414,8 +423,9 @@ class AboutScreen(Screen):
 class ScreenManagement(ScreenManager):
     def __init__(self, **kwargs):
         super(ScreenManagement, self).__init__(**kwargs)
-        self.add_widget(FourRingsScreen(name="4rings"))
-        self.add_widget(FiveRingsScreen(name="5rings"))
+        # self.add_widget(FourRingsScreen(name="4rings"))
+        # self.add_widget(FiveRingsScreen(name="5rings"))
+        self.add_widget(ColorScreen(name="color"))
         self.add_widget(SMDScreen(name="smd"))
         self.add_widget(SettingsScreen(name="settings"))
         self.add_widget(AboutScreen(name="about"))
@@ -438,6 +448,7 @@ class ResCalcApp(App):
         Builder.load_file(os.path.join(directory_kv_files, "smd.kv"))
         Builder.load_file(os.path.join(directory_kv_files, "settings.kv"))
         Builder.load_file(os.path.join(directory_kv_files, "about.kv"))
+        Builder.load_file(os.path.join(directory_kv_files, "color.kv"))
 
     def settings(self):
         self.root.ids.manager.current = 'settings'
@@ -451,12 +462,8 @@ class ResCalcApp(App):
         self.root.ids.manager.current = 'smd'
         return True
 
-    def four_rings(self):
-        self.root.ids.manager.current = '4rings'
-        return True
-
-    def five_rings(self):
-        self.root.ids.manager.current = '5rings'
+    def color(self):
+        self.root.ids.manager.current = 'color'
         return True
 
     def show_snackbar(self, snack_text):

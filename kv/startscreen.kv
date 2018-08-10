@@ -24,13 +24,9 @@ NavigationLayout:
         NavigationDrawerToolbar:
             title: "Navigation"
         NavigationDrawerIconButton:
-            icon: 'numeric-4-box'
-            text: "4 rings"
-            on_release: app.four_rings()
-        NavigationDrawerIconButton:
-            icon: 'numeric-5-box'
-            text: "5 rings"
-            on_release: app.five_rings()
+            icon: 'invert-colors'
+            text: "Color"
+            on_release: app.color()
         NavigationDrawerIconButton:
             icon: 'checkbox-blank'
             text: "SMD"
@@ -60,10 +56,8 @@ NavigationLayout:
         ScreenManagement:
             id: manager
             size_hint: 1, 0.5
-            FourRingsScreen:
-                id: 4rings
-            FiveRingsScreen:
-                id: 5rings
+            ColorScreen:
+                id: color_scr
             SMDScreen:
                 id: smd
             AboutScreen:
