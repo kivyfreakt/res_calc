@@ -93,6 +93,11 @@ class Scr(Screen):
             value = int(value)  # округляем float до int
         return (str(value) + s)
 
+    def format_mult(self, value):
+        '''Изменение значений сопротивлений в более удобный вид'''
+        value = BUTTON_MULTIPLIERS.index(value)
+        return (MULTIPLIERS[value])
+
     def is_int(self, n):
         '''Проверка того, является ли переменная целочисленной или нет'''
         return not (n % 1)
@@ -109,7 +114,7 @@ class FourRingsScreen(Scr):
     def __init__(self, **kwargs):
         super(FourRingsScreen, self).__init__(**kwargs)
         NUM_COLS = 4  # количество столбцов
-        self.resistor_params = ["1", "0", "0.1", "1%"]  # параметры резистора
+        self.resistor_params = ["1", "0", "x0.1", "1%"]  # параметры резистора
         self.cols_heads = ["1st ring", "2nd ring", "Multiplier", "Tolerance"]  # Названия каждого столбца
 
         parent = BoxLayout(orientation="vertical")
@@ -190,7 +195,7 @@ class FourRingsScreen(Scr):
     def calculation(self, instance):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
         self.resistor_params[int(instance.id)] = str(instance.text)   # устанавливаем параметры резистора
-        resistance = int(self.resistor_params[0] + self.resistor_params[1]) * float(self.resistor_params[2])   # первые 2 значения резистора умножаем на множитель
+        resistance = int(self.resistor_params[0] + self.resistor_params[1]) * self.format_mult(self.resistor_params[2])   # первые 2 значения резистора умножаем на множитель
         self.result.text = self.format_result(resistance) + "± " + self.resistor_params[3]   # изменяем значение Label
 
 
@@ -206,7 +211,7 @@ class FiveRingsScreen(Scr):
         super(FiveRingsScreen, self).__init__(**kwargs)
         NUM_COLS = 5
 
-        self.resistor_params = ["1", "0", "0", "0.01", "1%"]
+        self.resistor_params = ["1", "0", "0", "x0.01", "1%"]
         self.cols_heads = ["1st ring", "2nd ring", "3rd ring", "Multiplier", "Tolerance"]
         parent = BoxLayout(orientation="vertical")
         params_table = BoxLayout()
@@ -285,7 +290,7 @@ class FiveRingsScreen(Scr):
     def calculation(self, instance):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
         self.resistor_params[int(instance.id)] = str(instance.text)  # устанавливаем параметры резистора
-        resistance = int(self.resistor_params[0] + self.resistor_params[1] + self.resistor_params[2]) * float(self.resistor_params[3])  # первые 3 значения резистора умножаем на множитель
+        resistance = int(self.resistor_params[0] + self.resistor_params[1] + self.resistor_params[2]) * self.format_mult(self.resistor_params[3])  # первые 3 значения резистора умножаем на множитель
         self.result.text = self.format_result(resistance) + "± " + self.resistor_params[4]  # изменяем значение Label
 
 
