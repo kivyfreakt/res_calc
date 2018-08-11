@@ -1,7 +1,16 @@
+#:import MDTextField kivymd.textfields.MDTextField
+<PrefixDropDown>:
+    MDFlatButton:
+        text: 'Om'
+    MDFlatButton:
+        text: 'kOm'
+    MDFlatButton:
+        text: 'MOm'
+
 <ColorScreen>:
     MDTabbedPanel:
         id: tab_panel
-        tab_display_mode:'text'
+        tab_display_mode:app.tabs_display_mode
 
         MDTab:
             name: '4 bands'

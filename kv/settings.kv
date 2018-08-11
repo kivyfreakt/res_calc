@@ -20,3 +20,11 @@
                     app.show_snackbar('Your primary palette was changed to '+ app.theme_cls.primary_palette)
                 IconLeftSampleWidget:
                     icon: 'palette'
+            TwoLineIconListItem:
+                text: 'Change tabs display mode'
+                secondary_text: "Current: " + app.tabs_display_mode
+                on_release: 
+                    app.tabs_display_mode = 'text' if app.tabs_display_mode=='icons' else 'icons'
+                    app.show_snackbar('Tabs display mode was changed to '+ app.tabs_display_mode)
+                IconLeftSampleWidget:
+                    icon: 'tab'
