@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
-# import sys
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty, ListProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.button import MDIconButton
 from kivymd.snackbar import Snackbar
@@ -13,10 +12,7 @@ from kivymd.list import ILeftBodyTouch
 ROOT_DIR = os.path.dirname(__file__)
 KV_DIR = os.path.join(ROOT_DIR, "kv")
 
-# reload(sys)
-# sys.setdefaultencoding('utf8')
-
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 
 # ------------------------ Классы ------------------------
@@ -106,14 +102,17 @@ class FourRingsScreen(Scr):
                 по заданным параметрам резистора
     '''
     result = StringProperty()
+    resistor_colors = ListProperty()
 
     def __init__(self, **kwargs):
         super(FourRingsScreen, self).__init__(**kwargs)
         self.result = '1 Om ± 1%'  # сопротивление резитора
         self.resistor_params = ["1", "0", "x0.1", "1%"]  # параметры резистора
+        self.resistor_colors = [3, 2, 1, 3]  # номера цветов колец резистора в массиве всех цветов
 
-    def calculation(self, id_, text):
+    def calculation(self, id_, text, pos):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
+        self.resistor_colors[id_] = int(pos)    # устанавливаем цвета колец на картинке резистора
         self.resistor_params[id_] = str(text)   # устанавливаем параметры резистора
         resistance = int(self.resistor_params[0] + self.resistor_params[1]) * self.format_mult(self.resistor_params[2])   # первые 2 значения резистора умножаем на множитель
         self.result = self.format_result(resistance) + "± " + self.resistor_params[3]   # изменяем значение Label
@@ -128,14 +127,17 @@ class FiveRingsScreen(Scr):
                 по заданным параметрам резистора
     '''
     result = StringProperty()
+    resistor_colors = ListProperty()
 
     def __init__(self, **kwargs):
         super(FiveRingsScreen, self).__init__(**kwargs)
         self.result = '1 Om ± 1%'  # сопротивление резитора
         self.resistor_params = ["1", "0", "0", "x0.01", "1%"]  # параметры резистора
+        self.resistor_colors = [3, 2, 2, 0, 3]  # номера цветов колец резистора в массиве всех цветов
 
-    def calculation(self, id_, text):
+    def calculation(self, id_, text, pos):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
+        self.resistor_colors[id_] = int(pos)   # устанавливаем цвета колец на картинке резистора
         self.resistor_params[id_] = str(text)  # устанавливаем параметры резистора
         resistance = int(self.resistor_params[0] + self.resistor_params[1] + self.resistor_params[2]) * self.format_mult(self.resistor_params[3])  # первые 3 значения резистора умножаем на множитель
         self.result = self.format_result(resistance) + "± " + self.resistor_params[4]  # изменяем значение Label
@@ -169,10 +171,11 @@ class SMDScreen(Scr):
             if len(user_input) == 3:  # если длина user_input - 3 , то
                 resistance = int(user_input[0] + user_input[1]) * pow(10, int(user_input[2]))  # первые два числа из полученного значения умножаем на 10 в степени 3 числа
                 tolerance = self.TOLERANCES[1]
+                self.result = self.format_result(resistance) + "± " + tolerance  # изменяем значение Label
             elif len(user_input) == 4:  # если длина user_input - 4 , то
                 resistance = int(user_input[0] + user_input[1] + user_input[2]) * pow(10, int(user_input[3]))   # первые три числа из полученного значения умножаем на 10 в степени 4 числа
                 tolerance = self.TOLERANCES[2]
-            self.result = self.format_result(resistance) + "± " + tolerance  # изменяем значение Label
+                self.result = self.format_result(resistance) + "± " + tolerance  # изменяем значение Label
         else:  # если полученное значение не полностью число , то
             try:
                 if (user_input.index("R") >= 0) and not(user_input.index("R") == len(user_input) - 1):  # если в полученном значении если Буква R и она находится не на последнем месте, то
