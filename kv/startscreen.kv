@@ -12,19 +12,19 @@ NavigationLayout:
         NavigationDrawerIconButton:
             icon: 'invert-colors'
             text: "Color"
-            on_release: app.color()
+            on_release: app.root.ids.manager.current = 'color'
         NavigationDrawerIconButton:
             icon: 'checkbox-blank'
             text: "SMD"
-            on_release: app.smd()
+            on_release: app.root.ids.manager.current = 'smd'
         NavigationDrawerIconButton:
             icon: 'clipboard-text'
             text: "About"
-            on_release: app.about()
+            on_release: app.root.ids.manager.current = 'about'
         NavigationDrawerIconButton:
             icon: 'settings-box'
             text: "Settings"
-            on_release: app.settings()
+            on_release: app.root.ids.manager.current = 'settings'
         NavigationDrawerIconButton:
             icon: 'close-box'
             text: "Exit"

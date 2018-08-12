@@ -22,7 +22,9 @@
             TextInput:
                 id:text_input
                 multiline:False
-                on_text: root.update_padding(args[0])
+                on_text: 
+                    root.update_padding(args[0])
+                    root.check_text_len(self)
                 padding_x: self.width/2
                 size_hint:(None, None)
                 size:(150, 80)

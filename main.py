@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+# ------------------------ Библиотеки ------------------------
 import os
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, StringProperty, ListProperty
+from kivy.properties import StringProperty, ListProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.button import MDIconButton
 from kivymd.snackbar import Snackbar
@@ -27,7 +28,7 @@ class Scr(Screen):
             format_mult(self, value):
                 Изменение значений множителя
                 с кнопки в численный вид
-            is_int(self, value):
+            is_int(self, val):
                 Проверка того, является ли переменная(value) целочисленной или нет
     '''
 
@@ -71,13 +72,13 @@ class Scr(Screen):
         '''Изменение значений сопротивлений в более удобный вид'''
         s = " Om "
         if value >= self.MULTIPLIERS[11]:  # если сопротивление больше 10^8 , то
-            value /= self.MULTIPLIERS[11]  # делим сопротивление на 10^8 и
+            value = value / float(self.MULTIPLIERS[11])  # делим сопротивление на 10^8 и
             s = " GOm "                 # добавляем десятичную приставку
         elif value >= self.MULTIPLIERS[8]:
-            value /= self.MULTIPLIERS[8]
+            value = value / float(self.MULTIPLIERS[8])
             s = " MOm "
         elif value >= self.MULTIPLIERS[5]:
-            value /= self.MULTIPLIERS[5]
+            value = value / float(self.MULTIPLIERS[5])
             s = " kOm "
         if self.is_int(value):  # если значение целое число, то
             value = int(value)  # округляем float до int
@@ -88,9 +89,15 @@ class Scr(Screen):
         value = self.BUTTON_MULTIPLIERS.index(value)
         return (self.MULTIPLIERS[value])
 
-    def is_int(self, n):
+    def is_int(self, val):
         '''Проверка того, является ли переменная целочисленной или нет'''
-        return not (n % 1)
+        if type(val) == int:
+            return True
+        else:
+            if val.is_integer():
+                return True
+            else:
+                return False
 
 
 class FourRingsScreen(Scr):
@@ -102,13 +109,15 @@ class FourRingsScreen(Scr):
                 по заданным параметрам резистора
     '''
     result = StringProperty()
+    ''' Вычисленное значение сопротивления резистора '''
     resistor_colors = ListProperty()
+    ''' Номера цветов колец резистора в массиве всех цветов '''
 
     def __init__(self, **kwargs):
         super(FourRingsScreen, self).__init__(**kwargs)
-        self.result = '1 Om ± 1%'  # сопротивление резитора
+        self.result = '1 Om ± 1%'  # устанавливаем 'стандартное' сопротивление резитора
         self.resistor_params = ["1", "0", "x0.1", "1%"]  # параметры резистора
-        self.resistor_colors = [3, 2, 1, 3]  # номера цветов колец резистора в массиве всех цветов
+        self.resistor_colors = [3, 2, 1, 3]  # станавливаем 'стандартные' номера цветов колец резистора
 
     def calculation(self, id_, text, pos):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
@@ -127,7 +136,9 @@ class FiveRingsScreen(Scr):
                 по заданным параметрам резистора
     '''
     result = StringProperty()
+    ''' Вычисленное значение сопротивления резистора '''
     resistor_colors = ListProperty()
+    ''' Номера цветов колец резистора в массиве всех цветов '''
 
     def __init__(self, **kwargs):
         super(FiveRingsScreen, self).__init__(**kwargs)
@@ -155,12 +166,15 @@ class SMDScreen(Scr):
                 с маркировкой EIA-96. По таблице находим
                 значения, совпадающие с кодом digits, и множитель.
                 Возвращаем произведение значения и множителя
+            def update_padding(self, text_input, *args):
+                изменение padding у textinput, чтобы
+                введенное значение было строго по середине
     '''
     result = StringProperty()
+    ''' Вычисленное значение сопротивления резистора '''
 
     def __init__(self, **kwargs):
         super(SMDScreen, self).__init__(**kwargs)
-        self.result = ""
 
     def calculation(self, instance):
         '''Метод, производящий вычисление сопротивления, по заданным параметрам резистора'''
@@ -171,20 +185,19 @@ class SMDScreen(Scr):
             if len(user_input) == 3:  # если длина user_input - 3 , то
                 resistance = int(user_input[0] + user_input[1]) * pow(10, int(user_input[2]))  # первые два числа из полученного значения умножаем на 10 в степени 3 числа
                 tolerance = self.TOLERANCES[1]
+                print resistance
                 self.result = self.format_result(resistance) + "± " + tolerance  # изменяем значение Label
             elif len(user_input) == 4:  # если длина user_input - 4 , то
                 resistance = int(user_input[0] + user_input[1] + user_input[2]) * pow(10, int(user_input[3]))   # первые три числа из полученного значения умножаем на 10 в степени 4 числа
                 tolerance = self.TOLERANCES[2]
+                print resistance
                 self.result = self.format_result(resistance) + "± " + tolerance  # изменяем значение Label
         else:  # если полученное значение не полностью число , то
             try:
                 if (user_input.index("R") >= 0) and not(user_input.index("R") == len(user_input) - 1):  # если в полученном значении если Буква R и она находится не на последнем месте, то
-                    if(user_input.index("R") == 0):  # если в полученном значении R находится на 1 месте , то
-                        resistance = float(user_input.replace("R", "0."))  # заменяем букву R в строке на 0.
-                    else:
-                        resistance = float(user_input.replace("R", "."))  # иначе заменяем букву R в строке на .
+                    resistance = float(user_input.replace("R", "."))  # заменяем букву R в строке на .
                     self.result = self.format_result(resistance)  # изменяем значение Label
-            except ValueError:  # если буквы R в строке нет, то
+            except ValueError:  # если буквы R в строке нет, тоs
                 if len(user_input) == 3:  # если длина строки - 3
                     tolerance = self.TOLERANCES[2]
                     digits_code = user_input[0] + user_input[1]  # Первые два символа в строке
@@ -199,6 +212,7 @@ class SMDScreen(Scr):
             значения, совпадающие с кодом digits, и множитель.
             Возвращаем произведение значения и множителя
         '''
+
         value = 0  # значение сопротивления
         multiplier = 0  # множитель
         digits = int(digits)
@@ -243,12 +257,20 @@ class SMDScreen(Scr):
         return value * multiplier
 
     def update_padding(self, text_input, *args):
+        ''' изменение padding у textinput, чтобы
+            введенное значение было строго по середине
+        '''
+
         text_width = text_input._get_text_width(
             text_input.text,
             text_input.tab_width,
             text_input._label_cached
         )
         text_input.padding_x = (text_input.width - text_width) / 2
+
+    def check_text_len(self, instance):
+        if len(instance.text) > 4:
+            instance.text = instance.text[0:4:1]
 
 
 class ColorScreen(Scr):
@@ -277,21 +299,26 @@ class ScreenManagement(ScreenManager):
 
 class ResCalcApp(App):
     theme_cls = ThemeManager()
-    previous_date = ObjectProperty()
+    ''' объект класса ThemeManager, отвечающий
+        за смену различных параметров темы приложения.
+        Например, цветовая палитра, главный цвет, тема.
+    '''
     title = "ResCalc"
-    icon = "data/icon.png"
+    '''Заголовок приложения'''
+    icon = "data/images/icon.png"
+    '''Иконка приложения'''
     tabs_display_mode = StringProperty()
-    prefix_dropdown = ObjectProperty()
+    '''Режим отображения названия вкладок'''
 
     def build(self):
-        self.tabs_display_mode = 'text'
-        self.theme_cls.theme_style = 'Dark'
-        self.load_kv_files(KV_DIR)
-        main_widget = Builder.load_file(os.path.join(KV_DIR, "startscreen.kv"))
-        return main_widget
+        self.tabs_display_mode = 'text'  # установка отображения названия вкладок в виде текста
+        self.theme_cls.theme_style = 'Dark'  # установка стандартной темы приложения (Dark)
+        self.theme_cls.primary_palette = 'Teal'  # установка стандартной цветовой палитры приложения (Teal)
+        self.load_kv_files(KV_DIR)  # загружаем kv файлы
+        return Builder.load_file(os.path.join(KV_DIR, "startscreen.kv"))  # загружаем главное окно приложения
 
     def load_kv_files(self, directory_kv_files):
-        Builder.load_file(os.path.join(directory_kv_files, "startscreen.kv"))
+        '''Загрузка всех файлов с интерфейсом приложения'''
         Builder.load_file(os.path.join(directory_kv_files, "smd.kv"))
         Builder.load_file(os.path.join(directory_kv_files, "settings.kv"))
         Builder.load_file(os.path.join(directory_kv_files, "about.kv"))
@@ -299,23 +326,8 @@ class ResCalcApp(App):
         Builder.load_file(os.path.join(directory_kv_files, "4bands.kv"))
         Builder.load_file(os.path.join(directory_kv_files, "5bands.kv"))
 
-    def settings(self):
-        self.root.ids.manager.current = 'settings'
-        return True
-
-    def about(self):
-        self.root.ids.manager.current = 'about'
-        return True
-
-    def smd(self):
-        self.root.ids.manager.current = 'smd'
-        return True
-
-    def color(self):
-        self.root.ids.manager.current = 'color'
-        return True
-
     def show_snackbar(self, snack_text):
+        '''Отображение snackbar с переданным текстом'''
         Snackbar(text=snack_text).show()
 
 

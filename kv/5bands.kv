@@ -5,7 +5,7 @@
 		padding:[5, 5, 5, 5]
 		Image:
 			pos_hint: {'top': 1, 'center_y': .5, 'center_x': .5}
-			source: "data/resistor.png"
+			source: "data/images/resistor_teal.png" if app.theme_cls.primary_palette == 'Teal' else "data/images/resistor_blue.png"
 			size_hint: None, None
 			size: self.texture_size
 			canvas.after:
